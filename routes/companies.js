@@ -15,21 +15,11 @@ const companySearchSchema = require("../schemas/companySearch.json");
 
 const router = new express.Router();
 
-
-/** POST / { company } =>  { company }
- *
- * company should be { handle, name, description, numEmployees, logoUrl }
- *
- * Returns { handle, name, description, numEmployees, logoUrl }
- *
- * Authorization required: admin
- */
-
 router.post("/", ensureAdmin, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, companyNewSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -40,17 +30,6 @@ router.post("/", ensureAdmin, async function (req, res, next) {
   }
 });
 
-/** GET /  =>
- *   { companies: [ { handle, name, description, numEmployees, logoUrl }, ...] }
- *
- * Can filter on provided search filters:
- * - minEmployees
- * - maxEmployees
- * - nameLike (will find case-insensitive, partial matches)
- *
- * Authorization required: none
- */
-
 router.get("/", async function (req, res, next) {
   const q = req.query;
   // arrive as strings from querystring, but we want as ints
@@ -60,7 +39,7 @@ router.get("/", async function (req, res, next) {
   try {
     const validator = jsonschema.validate(q, companySearchSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -71,14 +50,6 @@ router.get("/", async function (req, res, next) {
   }
 });
 
-/** GET /[handle]  =>  { company }
- *
- *  Company is { handle, name, description, numEmployees, logoUrl, jobs }
- *   where jobs is [{ id, title, salary, equity }, ...]
- *
- * Authorization required: none
- */
-
 router.get("/:handle", async function (req, res, next) {
   try {
     const company = await Company.get(req.params.handle);
@@ -88,22 +59,11 @@ router.get("/:handle", async function (req, res, next) {
   }
 });
 
-/** PATCH /[handle] { fld1, fld2, ... } => { company }
- *
- * Patches company data.
- *
- * fields can be: { name, description, numEmployees, logo_url }
- *
- * Returns { handle, name, description, numEmployees, logo_url }
- *
- * Authorization required: admin
- */
-
 router.patch("/:handle", ensureAdmin, async function (req, res, next) {
   try {
     const validator = jsonschema.validate(req.body, companyUpdateSchema);
     if (!validator.valid) {
-      const errs = validator.errors.map(e => e.stack);
+      const errs = validator.errors.map((e) => e.stack);
       throw new BadRequestError(errs);
     }
 
@@ -114,11 +74,6 @@ router.patch("/:handle", ensureAdmin, async function (req, res, next) {
   }
 });
 
-/** DELETE /[handle]  =>  { deleted: handle }
- *
- * Authorization: admin
- */
-
 router.delete("/:handle", ensureAdmin, async function (req, res, next) {
   try {
     await Company.remove(req.params.handle);
@@ -127,6 +82,5 @@ router.delete("/:handle", ensureAdmin, async function (req, res, next) {
     return next(err);
   }
 });
-
 
 module.exports = router;

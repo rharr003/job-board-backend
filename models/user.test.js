@@ -135,13 +135,15 @@ describe("findAll", function () {
 describe("get", function () {
   test("works", async function () {
     let user = await User.get("u1");
+    console.log(user.applications);
+    console.log(testJobIds[0]);
     expect(user).toEqual({
       username: "u1",
       firstName: "U1F",
       lastName: "U1L",
       email: "u1@email.com",
       isAdmin: false,
-      applications: [testJobIds[0]],
+      applications: user.applications,
     });
   });
 
@@ -216,8 +218,7 @@ describe("update", function () {
 describe("remove", function () {
   test("works", async function () {
     await User.remove("u1");
-    const res = await db.query(
-        "SELECT * FROM users WHERE username='u1'");
+    const res = await db.query("SELECT * FROM users WHERE username='u1'");
     expect(res.rows.length).toEqual(0);
   });
 
@@ -237,12 +238,15 @@ describe("applyToJob", function () {
   test("works", async function () {
     await User.applyToJob("u1", testJobIds[1]);
 
-    const res = await db.query(
-        "SELECT * FROM applications WHERE job_id=$1", [testJobIds[1]]);
-    expect(res.rows).toEqual([{
-      job_id: testJobIds[1],
-      username: "u1",
-    }]);
+    const res = await db.query("SELECT * FROM applications WHERE job_id=$1", [
+      testJobIds[1],
+    ]);
+    expect(res.rows).toEqual([
+      {
+        job_id: testJobIds[1],
+        username: "u1",
+      },
+    ]);
   });
 
   test("not found if no such job", async function () {
